@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Information - MomCare</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #e91e63;
+            font-size: 28px;
+        }
+
+        .header span {
+            font-size: 50px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .form-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 22px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: 0.3s;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #e91e63;
+        }
+
+        .form-group input::placeholder {
+            color: #999;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-save {
+            background: #e91e63;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #c2185b;
+        }
+
+        .btn-back {
+            background: #f8bbd0;
+            color: #e91e63;
+        }
+
+        .btn-back:hover {
+            background: #f48fb1;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        .success-message {
+            display: none;
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <span>🏥</span>
+            <h1>Medical Information</h1>
+        </div>
+
+        <div class="form-card">
+            <h2 class="form-title">Enter Your Medical Details</h2>
+
+            <div class="success-message" id="successMessage">
+                ✓ Medical information saved successfully!
+            </div>
+
+            <form id="medicalForm">
+                <!-- Blood Type -->
+                <div class="form-group">
+                    <label>🩸 Blood Type</label>
+                    <select id="bloodType" required>
+                        <option value="">Select Blood Type</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="Unknown">Unknown</option>
+                    </select>
+                </div>
+
+                <!-- Doctor Name -->
+                <div class="form-group">
+                    <label>👩‍⚕️ Doctor's Name</label>
+                    <input type="text" id="doctorName" placeholder="Enter doctor's name" required>
+                </div>
+
+                <!-- Doctor Phone Number -->
+                <div class="form-group">
+                    <label>📞 Doctor's Phone Number</label>
+                    <input type="tel" id="doctorPhone" placeholder="Enter doctor's phone number" required>
+                </div>
+
+                <!-- Allergies -->
+                <div class="form-group">
+                    <label>⚠️ Allergies</label>
+                    <input type="text" id="allergies" placeholder="Enter any allergies (or None)">
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="form-group">
+                    <label>📝 Additional Medical Notes</label>
+                    <input type="text" id="medicalNotes" placeholder="Any other medical conditions or notes">
+                </div>
+
+                <button type="submit" class="btn btn-save">💾 Save Information</button>
+                <button type="button" class="btn btn-back" onclick="goBack()">← Back to Dashboard</button>
+            </form>
+
+            <p class="info-text">
+                This information will be shared with emergency services when you press EHP
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Load existing data if available
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedData = localStorage.getItem('momcare_medical_info');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('bloodType').value = data.bloodType || '';
+                document.getElementById('doctorName').value = data.doctorName || '';
+                document.getElementById('doctorPhone').value = data.doctorPhone || '';
+                document.getElementById('allergies').value = data.allergies || '';
+                document.getElementById('medicalNotes').value = data.medicalNotes || '';
+            }
+        });
+
+        // Save form data
+        document.getElementById('medicalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const medicalInfo = {
+                bloodType: document.getElementById('bloodType').value,
+                doctorName: document.getElementById('doctorName').value,
+                doctorPhone: document.getElementById('doctorPhone').value,
+                allergies: document.getElementById('allergies').value,
+                medicalNotes: document.getElementById('medicalNotes').value,
+                savedAt: new Date().toISOString()
+            };
+
+            // Save to localStorage
+            localStorage.setItem('momcare_medical_info', JSON.stringify(medicalInfo));
+
+            // Show success message
+            const successMsg = document.getElementById('successMessage');
+            successMsg.style.display = 'block';
+
+            // Hide success message after 3 seconds
+            setTimeout(function() {
+                successMsg.style.display = 'none';
+            }, 3000);
+
+            console.log('Medical info saved:', medicalInfo);
+        });
+
+        function goBack() {
+            // Check if there's a main dashboard to go back to
+            const mainDashboard = localStorage.getItem('momcare_current');
+            if (mainDashboard) {
+                window.location.href = 'pregnancy-sos.html';
+            } else {
+                alert('Please login first to access the dashboard');
+                window.location.href = 'pregnancy-sos.html';
+            }
+        }
+    </script>
+
+</body>
+</html>
